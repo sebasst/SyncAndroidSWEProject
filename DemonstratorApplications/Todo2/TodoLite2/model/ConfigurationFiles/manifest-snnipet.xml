@@ -1,0 +1,63 @@
+<!-- add this configuration to your manifest file -->
+
+<!-- permissions ==> before application configuration-->
+	<!-- network -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    
+
+    <!-- Authenticator -->
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+	<uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+
+    <!-- Sync Adapter -->
+    <uses-permission android:name="android.permission.READ_SYNC_STATS" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+
+
+<!-- permissions ==> inside application configuration-->	
+	 
+        android:name="com.york.cs.todolite2.document2.Application"
+        android:allowBackup="true"
+        
+        
+		 <activity
+            android:name="com.york.cs.services.activities.LoginActivity"
+            android:label="@string/loginLabel" />
+        <activity
+            android:name="com.york.cs.services.activities.SignUpActivity"
+            android:label="@string/sing_upLabel" />
+			
+		
+		        <service android:name="com.york.cs.services.authentication.AuthenticatorService" >
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        <!-- Sync adapter related service -->
+        <service
+            android:name="com.york.cs.services.SyncAdapter.SyncAService"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/sync_adapter" />
+        </service>
+		
+		        <provider
+            android:name="com.york.cs.services.SyncAdapter.ContentProviderApp"
+            android:authorities="com.york.cs.todolite2.document2"
+            android:exported="false"
+            android:syncable="true" >
+        </provider>
+	

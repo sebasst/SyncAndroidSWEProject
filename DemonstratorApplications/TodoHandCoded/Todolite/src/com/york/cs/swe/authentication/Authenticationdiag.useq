@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence-diagram version="1.1.6" icons="true">  
+  <object id="1" language="java" name="com.york.cs.services.activities.SignUpActivity" project="TodoLite2" 
+    file="/TodoLite2/src/com/york/cs/services/activities/SignUpActivity.java" binary="false" label="signUpActivity" 
+    type="class" autoSize="true">    
+    <position height="-1" width="-1" x="23" y="0"/>    
+    <execution id="2">      
+      <position height="362" width="140" x="5" y="82"/>    
+    </execution>  
+  </object>  
+  <object id="5" language="java" name="com.york.cs.services.authentication.UserManager" project="TodoLite2" 
+    file="/TodoLite2/src/com/york/cs/services/authentication/UserManager.java" binary="false" label="userManager" 
+    type="class" autoSize="true">    
+    <position height="-1" width="-1" x="153" y="0"/>    
+    <execution id="4">      
+      <position height="320" width="160" x="5" y="103"/>    
+    </execution>  
+  </object>  
+  <object id="14" language="java" name="com.york.cs.services.authentication.User" project="TodoLite2" 
+    file="/TodoLite2/src/com/york/cs/services/authentication/User.java" binary="false" label="user" type="class" 
+    autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="13">      
+      <position height="21" width="0" x="0" y="381"/>    
+    </execution>    
+    <execution id="7">      
+      <position height="21" width="160" x="313" y="124"/>    
+    </execution>  
+  </object>  
+  <object id="15" language="java" name="android.accounts.AccountManager" project="TodoLite2" 
+    file="D:/Development/sdk/platforms/android-19/android.jar" binary="true" label="mAccountManager" type="class" 
+    autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="9">      
+      <position height="21" width="0" x="0" y="173"/>    
+    </execution>    
+    <execution id="11">      
+      <position height="21" width="0" x="0" y="339"/>    
+    </execution>  
+  </object>  
+  <object id="16" language="java" name="com.york.cs.services.authentication.AuthenticatorApp" project="TodoLite2" 
+    file="/TodoLite2/src/com/york/cs/services/authentication/AuthenticatorApp.java" binary="false" 
+    label="authenticatorApp" type="class" autoSize="true">    
+    <position height="-1" width="-1" x="153" y="0"/>  
+  </object>  
+  <object id="17" language="java" name="com.york.cs.services.authentication.AuthenticatorService" project="TodoLite2" 
+    file="/TodoLite2/src/com/york/cs/services/authentication/AuthenticatorService.java" binary="false" 
+    label="authenticatorService" type="class" autoSize="true">    
+    <position height="-1" width="-1" x="153" y="0"/>  
+  </object>  
+  <object id="18" language="java" name="com.york.cs.services.authentication.SessionSync" project="TodoLite2" 
+    file="/TodoLite2/src/com/york/cs/services/authentication/SessionSync.java" binary="false" label="sessionSync" 
+    type="class" autoSize="true">    
+    <position height="-1" width="-1" x="153" y="0"/>  
+  </object>  
+  <object id="19" language="java" name="com.york.cs.services.authentication.Profile" project="TodoLite2" 
+    file="/TodoLite2/src/com/york/cs/services/authentication/Profile.java" binary="false" label="profile" type="class" 
+    autoSize="true">    
+    <position height="-1" width="-1" x="153" y="0"/>  
+  </object>  
+  <object id="20" language="java" name="com.york.cs.services.authentication.AppServer" project="TodoLite2" 
+    file="/TodoLite2/src/com/york/cs/services/authentication/AppServer.java" binary="false" label="appServer" 
+    type="class" autoSize="true">    
+    <position height="-1" width="-1" x="153" y="0"/>  
+  </object>  
+  <message id="3" 
+    operation="addAccountToDevice(android.content.Context,com.york.cs.services.authentication.User):boolean">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="4"/>  
+  </message>  
+  <message id="6" operation="User(java.lang.String,java.lang.String,java.lang.String,java.lang.String)">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="7"/>  
+  </message>  
+  <message id="8" operation="addAccountExplicitly(android.accounts.Account,java.lang.String,android.os.Bundle):boolean">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="9"/>  
+  </message>  
+  <message id="10" operation="setAuthToken(android.accounts.Account,java.lang.String,java.lang.String):void">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="11"/>  
+  </message>  
+  <message id="12" operation="getSessionToken():java.lang.String">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="13"/>  
+  </message>
+</sequence-diagram>

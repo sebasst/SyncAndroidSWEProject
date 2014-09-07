@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="AUTHENTICATION_SERVER_URL">http://10.0.3.2:8080/SyncService</string>
+
+</resources>

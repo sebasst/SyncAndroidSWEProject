@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ToDoLite2</string>
+    <string name="app_id">501518809925546</string>
+    <string name="action_new_list">New list</string>
+    <string name="action_login">Log in</string>
+    <string name="action_share">Share</string>
+    <string name="action_delete">Delete</string>
+    <string name="hint_new_list">List title</string>
+    <string name="hint_create_task">Add new task</string>
+    <string name="navigation_drawer_open">Open drawer</string>
+    <string name="navigation_drawer_close">Close drawer</string>
+    <string name="title_activity_share">Share</string>
+    <string name="title_dialog_new_list">Create new list</string>
+    <string name="title_activity_image_view">ImageViewActivity</string>
+    <string name="create_an_account_title">create an account, please</string>
+    <string name="user_name">user name</string>
+    <string name="email">email</string>
+    <string name="password">password</string>
+    <string name="emailLabe">email</string>
+    <string name="usernameLable">name</string>
+    <string name="passwordLabel">password</string>
+    <string name="okButton">OK</string>
+    <string name="email_addressHint">Email address</string>
+    <string name="nameHint">Name</string>
+    <string name="passwordHint">Password</string>
+    <string name="sign_inButtonLabel">Sign in</string>
+    <string name="new_user_qLbel">New user?</string>
+    
+    <string name="create_accountButtonLabel">Create Account</string>
+    <string name="already_a_member_ButtonLabel">Already a member?</string>
+    <string name="please_fill_all_the_fieldsSign">Please fill all the fields</string>
+    <string name="sync_nowButton">Sync Now</string>
+    <string name="please_connect_first">Please login first</string>
+    <string name="creationAccountErrorMessage">Sorry.. the account was not created. Please check your internet connection.</string>
+    <string name="account_was_not_createdMessage">Account was not created</string>
+    <string name="conectingMessage">Connecting..</string>
+    <string name="please_waitMessage">Please wait. . .</string>
+    <string name="remove_accountMenu">Remove Account</string>
+    <string name="not_loggedTitle">Not Logged</string>
+    <string name="chechPasswordMsg">Please check your user name and your password and your internet conecction or create a new account</string>
+
+</resources>

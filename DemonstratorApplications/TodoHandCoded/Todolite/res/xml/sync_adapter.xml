@@ -1,0 +1,8 @@
+
+<sync-adapter xmlns:android="http://schemas.android.com/apk/res/android"
+              android:contentAuthority="com.york.cs.todolite1"
+              android:accountType="com.york.cs.todolite1"
+              android:userVisible="true"
+              android:allowParallelSyncs="false"
+              android:isAlwaysSyncable="true"
+              android:supportsUploading="true"/>
