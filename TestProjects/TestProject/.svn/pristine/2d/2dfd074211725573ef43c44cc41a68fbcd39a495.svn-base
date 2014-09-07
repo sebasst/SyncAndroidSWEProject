@@ -1,0 +1,151 @@
+package com.york.cs.todolite2.test.blog;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import com.york.cs.couchbaseapi.*;
+import com.york.cs.couchbaseapi.queryBuilder.QueryProducer;
+
+// protected region custom-imports on begin
+// protected region custom-imports end
+
+public class Post extends DBObject {
+	
+	
+	protected List<String> tags1 = null;
+	protected List<Integer> ratings = null;
+	protected List<Comment> comments = null;
+	protected List<Author> authors2 = null;
+	protected Author author1 = null;
+	protected Stats stats = null;
+	
+	// protected region custom-fields-and-methods on begin
+	// protected region custom-fields-and-methods end
+	
+	
+	public Post() { 
+		super();
+		sharingStatus="private";	
+		dbObject.put("author1", new HashMap<String, Object>());
+		dbObject.put("stats", new HashMap<String, Object>());
+		dbObject.put("tags1", new ArrayList<String>());
+		dbObject.put("ratings", new ArrayList<Integer>());
+		dbObject.put("comments", new ArrayList<HashMap<String, Object>>());
+		dbObject.put("authors2", new ArrayList<HashMap<String, Object>>());
+	}
+	
+	
+		public static QueryProducer Post_title= new QueryProducer("com.york.cs.todolite2.test.blog.Post.title", "com.york.cs.todolite2.test.blog.Post");
+		public static QueryProducer Post_tags1= new QueryProducer("com.york.cs.todolite2.test.blog.Post.tags1", "com.york.cs.todolite2.test.blog.Post");
+		public static QueryProducer Post_ratings= new QueryProducer("com.york.cs.todolite2.test.blog.Post.ratings", "com.york.cs.todolite2.test.blog.Post");
+		public static QueryProducer Post_postType= new QueryProducer("com.york.cs.todolite2.test.blog.Post.postType", "com.york.cs.todolite2.test.blog.Post");
+		public static QueryProducer Post_author1= new QueryProducer("com.york.cs.todolite2.test.blog.Post.author1","com.york.cs.todolite2.test.blog.Post");
+		public static QueryProducer Post_authors2= new QueryProducer("com.york.cs.todolite2.test.blog.Post.authors2","com.york.cs.todolite2.test.blog.Post");
+
+	
+	public String getTitle() {
+		return parseString(dbObject.get("title")+"", "");
+	}
+	
+	public Post setTitle(String title) {
+		dbObject.put("title", title);
+		notifyChanged();
+		return this;
+	}
+	public PostType getPostType() {
+		PostType postType = null;
+		try {
+			postType = PostType.valueOf(dbObject.get("postType")+"");
+		}
+		catch (Exception ex) {}
+		return postType;
+	}
+	
+	
+	public Post setPostType(PostType postType) {
+		dbObject.put("postType", postType.toString());
+		notifyChanged();
+		return this;
+	}
+	
+	public List<String> getTags1() {
+		if (tags1 == null) {//TODO -TIPOS DE OBJECTO //FIXME 
+			tags1 = new PrimitiveList<String>(this, ((ArrayList<String>) dbObject.get("tags1")));
+		}
+		return tags1;
+	}
+	public List<Integer> getRatings() {
+		if (ratings == null) {//TODO -TIPOS DE OBJECTO //FIXME 
+			ratings = new PrimitiveList<Integer>(this, ((ArrayList<Integer>) dbObject.get("ratings")));
+		}
+		return ratings;
+	}
+	
+	
+	/*getter  REFERENCES to contained classes*/
+	/* **************************    **********************/ 
+	/*getter multiple REFERENCES*/
+	public List<Comment> getComments() {
+		if (comments == null) {
+			comments = new DBList<Comment>(this, "comments", true);
+		}
+		return comments;
+	}
+
+	/*Setter and getter simple CONTAIMENT REFERENCES references to inner classes*/
+	public Stats getStats() {
+		if (stats == null && dbObject.containsKey("stats")) {
+			stats = (Stats) ClassDBFactory.getInstance().createDBObject((HashMap<String, Object>) dbObject.get("stats"));
+			stats.setContainer(this);
+		}
+		return stats;
+	}
+	
+	public Post setStats(Stats stats) {
+		if (this.stats != stats) {
+			if (stats == null) {
+				dbObject.remove("stats");
+			}
+			else {
+				dbObject.put("stats", stats.getDbObject());
+			}
+			this.stats = stats;
+			notifyChanged();
+		}
+		return this;
+	}
+	
+	//DOCUMENTS!!!!!!!!!!!!!!!!!
+		/*Setter and getter simple NOT CONTAIMENT REFERENCES references to toher documents*/
+	
+	public Post setAuthor1(Author author1) {
+		if (this.author1 != author1) {
+			if (author1 == null) {
+				dbObject.put("author1", new HashMap<String, Object>());
+				if(this.author1 !=null) this.author1 .removeReferencedBy(getId());
+			}
+			else {
+				createReference("author1", author1);
+			}
+			this.author1 = author1;
+			notifyChanged();
+		}
+		return this;
+	}
+	
+	public Author getAuthor1() {
+		if (author1 == null) {
+			author1 = (Author) resolveReference("author1");
+		}
+		return author1;
+	}
+	
+	
+	/*getter multiple REFERENCES*/
+	public List<Author> getAuthors2() {
+		if (authors2 == null) {
+			authors2 = new DBList<Author>(this, "authors2", false);
+		}
+		return authors2;
+	}
+}
