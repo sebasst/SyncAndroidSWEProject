@@ -1,0 +1,87 @@
+[%import "javautil.eol";%]
+[%import "ecoreutil.eol";%]
+[%var clazzez=EClass.all.select(sc | sc.isDocument());
+
+%]
+{
+  "log": ["CRUD", "CRUD+", "HTTP", "HTTP+", "Access", "Cache", "Shadow","Shadow+", "Changes", "Changes+"],
+  "facebook": { "register": true },
+    "databases": {
+    "todos": {
+      "server": "http://localhost:8091",
+     "bucket":"sync_gateway",
+	 "users": {
+        "GUEST": {"disabled": true}
+      },
+      "sync": `
+
+function(doc, oldDoc) {
+  if (doc.type == "com.york.cs.services.authentication.Profile.class") {
+    channel("com.york.cs.services.authentication.Profile.class");
+    var user = doc._id.substring(doc._id.indexOf(":")+1);
+    if (user !== doc.userId) {
+      throw({forbidden : "profile user_id must match docid"})
+    }
+    requireUser(user);
+    access(user, "com.york.cs.services.authentication.Profile.class"); // TODO this should use roles
+  }
+  [%for(c in clazzez.select(sc|sc.isShareable())){%]
+  else if (doc.type == "[%=c.ePackage.name%].[%=c.name%]"){
+  	 channel(""+doc._id);
+  	  if (!doc.owner_id) {
+      throw({forbidden : "[%=c.name%] must have an owner"})
+      	}
+      [*ONLY FOR OWNER*]
+      [%if(c.isCanEditAll()){%]
+      	if (oldDoc) {
+      		var oldOwnerName = oldDoc.owner_id.substring(oldDoc.owner_id.indexOf(":")+1);
+      		requireUser(oldOwnerName)
+    	}
+    	[%}%]
+    	var ownerName = doc.owner_id.substring(doc.owner_id.indexOf(":")+1);
+    	access(ownerName, ""+doc._id);
+    	if (Array.isArray(doc.membersId)) {
+      	var memberNames = [];
+      	for (var i = doc.membersId.length - 1; i >= 0; i--) {
+        	memberNames.push(doc.membersId[i].substring(doc.membersId[i].indexOf(":")+1))
+      		};
+      	access(memberNames, ""+doc._id);
+   		 }
+   	}
+  [%}%]
+  
+  [%for(c in clazzez.select(sc|sc.isPrivate())){%]
+  else if (doc.type == "[%=c.ePackage.name%].[%=c.name%]"){
+  	 channel(""+doc._id);
+  	  if (!doc.owner_id) {
+      throw({forbidden : "list must have an owner"})
+      	}
+      [*ONLY FOR OWNER*]
+      	if (oldDoc) {
+      		var oldOwnerName = oldDoc.owner_id.substring(oldDoc.owner_id.indexOf(":")+1);
+      		requireUser(oldOwnerName)
+    	}
+    	var ownerName = doc.owner_id.substring(doc.owner_id.indexOf(":")+1);
+    	access(ownerName, ""+doc._id);
+    }
+  [%}%]
+
+  [%for(c in clazzez.select(sc|sc.isPublic())){%]
+  else if (doc.type == "[%=c.ePackage.name%].[%=c.name%]"){
+  	 channel("*");
+  	  if (!doc.owner_id) {
+      throw({forbidden : "list must have an owner"})
+      	}
+      [*ONLY FOR OWNER*]
+      	if (oldDoc) {
+      		var oldOwnerName = oldDoc.owner_id.substring(oldDoc.owner_id.indexOf(":")+1);
+      		requireUser(oldOwnerName)
+    	}
+    	var ownerName = doc.owner_id.substring(doc.owner_id.indexOf(":")+1);
+    	
+    }
+  [%}%]  
+ 
+}`
+}}}
+

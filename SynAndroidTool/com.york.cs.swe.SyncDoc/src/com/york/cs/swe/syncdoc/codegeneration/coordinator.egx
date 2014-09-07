@@ -1,0 +1,90 @@
+import "javautil.eol";
+import "ecoreutil.eol";
+
+pre {
+
+	
+	
+	var keywords = List{"abstract", "volatile", "transient", 
+		"interface", "container", "private", "public"};
+	
+	for (e in EStructuralFeature.all.includingAll(EEnumLiteral.all)) {
+		if (keywords.includes(e.name)) {
+			e.name = "-" + e.name;
+		}
+	}
+	
+	
+	
+	
+	
+}
+
+
+
+
+rule EClass2DBClass
+	transform c : EClass {
+	
+	guard : c.isAnnotatedAs("db")
+	
+	template : "eclass2dbclass.egl"
+	
+	target : c.name + ".java"
+	
+}
+
+
+rule EClass2Class 
+	transform c : EClass {
+	
+	guard : not c.isAnnotatedAs("db") and not c.isAnnotatedAs("stub")
+	
+	template : "eclass2class.egl"
+	
+	target : c.name + ".java"
+	
+}
+
+
+
+
+
+
+rule EClass2CollectionClass 
+	transform c : EClass {
+	
+	guard : c.isAnnotatedAs("collection") or 
+		EClass.all.select(e|e.isAnnotatedAs("db")).
+			exists(e|e.eAllStructuralFeatures.exists(sf|sf.eType = c and sf.getAnnotationValue("collection", "fromstub") <> "true"))
+	
+	template : "eclass2collectionclass.egl"
+	
+	target : c.name + "Collection.java"
+	
+}
+
+rule EEnum2Enumeration 
+	transform e : EEnum {
+	
+	guard: not e.isAnnotatedAs("stub")
+	
+	template : "eenum2enumeration.egl"
+	
+	target : e.name + ".java"
+	
+}
+
+
+rule EClass2APPClass
+	transform c : EClass {
+	
+	guard : c.isAnnotatedAs("db")
+	
+	template : "eclass2appclass.egl"
+	
+	target : "Application.java"
+	
+}
+
+

@@ -1,0 +1,47 @@
+[%import "javautil.eol";%]
+package [%=c.ePackage.name%];
+
+import com.couchbase.lite.Database;
+import com.york.cs.couchbaseapi.*;
+
+[%if (c.isAnnotatedAs("customize")){%]
+[% out.setContentType("Java"); %]
+// protected region custom-imports on begin
+// protected region custom-imports end
+[%}%]
+
+public class [%=c.name%] extends CouchDB {
+	
+	public [%=c.name%]() {}
+	
+	public [%=c.name%](Database db) {
+		setDb(db);
+	}
+	
+	[*multi valu contaiment reference*]
+	[%for (ref in c.eAllReferences.select(sf|sf.isMany and sf.isContainment)){%]
+	protected [%=ref.getJavaCollectionType()%] [%=ref.name%] = null;
+	[%}%]
+	
+	
+	[%if (c.isAnnotatedAs("customize")){%]
+	[% out.setContentType("Java"); %]
+	// protected region custom-fields-and-methods on begin
+	// protected region custom-fields-and-methods end
+	[%}%]	
+	[%for (ref in c.eAllReferences.select(sf|sf.isMany and sf.isContainment)){%]
+	public [%=ref.getJavaCollectionType()%] get[%=ref.name.ftuc()%]() {
+		return [%=ref.name%];
+	}
+	
+	[%}%]
+	
+	@Override
+	public void setDb(Database db) {
+		super.setDb(db);
+		[%for (ref in c.eAllReferences.select(sf|sf.isMany and sf.isContainment)){%]
+		[%=ref.name%] = new [%=ref.getJavaCollectionType()%](db);
+		dbCollections.add([%=ref.name%]);
+		[%}%]
+	}
+}

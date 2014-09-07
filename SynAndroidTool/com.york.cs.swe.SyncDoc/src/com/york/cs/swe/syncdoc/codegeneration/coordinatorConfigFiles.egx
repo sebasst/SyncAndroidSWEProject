@@ -1,0 +1,62 @@
+import "javautil.eol";
+import "ecoreutil.eol";
+
+pre {
+
+
+	
+	
+
+	
+	
+}
+
+
+rule model2ServerConfFile
+	transform c : EClass {
+	
+	guard : c.isAnnotatedAs("db")
+	
+	
+	template : "ServerConf.egl"
+	
+	target : "config.json"
+	
+}
+
+rule model2ManifestConf
+	transform c : EClass {
+	
+	guard : c.isAnnotatedAs("db")
+	
+	
+	template : "eclass2manifest.egl"
+	
+	target : "manifest-snnipet.xml"
+	
+}
+
+rule model2AuhenticatorConf
+	transform c : EClass {
+	
+	guard : c.isAnnotatedAs("db")
+	
+	
+	template : "eclass2authenticator.egl"
+	
+	target : "authenticator.xml"
+	
+}
+
+rule model2SyncAConf
+	transform c : EClass {
+	
+	guard : c.isAnnotatedAs("db")
+	
+	template : "eclass2sync_adapter.egl"
+	
+	target : "sync_adapter.xml"
+	
+}
+
+

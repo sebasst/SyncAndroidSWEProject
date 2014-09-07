@@ -1,0 +1,213 @@
+import "ecoreutil.eol";
+
+
+
+var c=EClass.all.select(sc | sc.name.equals("ListTasks")).first();
+
+//c.getAnnotationValue("documents","sharing").println();
+
+
+
+/*
+var c=EClass.all.select(sc | sc.name.equals("Comment")).first(); 
+
+c.isDocument().println("-->");
+operation EClass isDocument():Boolean{
+
+	var dbClass =EClass.all.select(c | c.isAnnotatedAs("db")).first();
+	dbClass.println("");
+	if(self.isAnnotatedAs("document"))return true;
+	
+	for( ref in dbClass.eAllContainments.select(r |r.isContainment )){
+		if(self== ref.eReferenceType) return true;
+	}
+	return false;
+	
+} 
+*/
+
+
+//
+
+/*
+var c=EClass.all.select(sc | sc.name.equals("Post")).first(); 
+c.name.println();
+
+for (subC in EClass.all.select(sc | sc.eSuperTypes.includes(c))) {
+
+	c.name.println();
+
+}
+*/
+
+/*
+"*******************************************************".println();
+var addressmap ="db".getAddressMap();
+
+var attrs =EAttribute.allInstances().select(a| not a.eContainingClass.isAnnotatedAs("db"));
+
+attrs.first().name.println();
+addressmap.get(attrs.first()).println(" ========>"+attrs.first().name +" adress: ");
+
+for (a in attrs){
+	var addressmap ="db".getAddressMap();
+	a.name.println(" ========>");
+	for(s in addressmap.get(a)){
+		s.println("------------->");
+	}
+}
+
+
+"*******************************************************".println();
+
+*/
+
+@cached
+operation String getAddressMap():Map{
+
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".println();
+	var map :Map;
+	var attrs =EAttribute.allInstances().select(a| not a.eContainingClass.isAnnotatedAs("db"));
+	for(a in attrs){
+	var  addrs : Sequence; 
+		//map.put(a.eContainingClass.name+"."+a.name, addrs);
+		map.put(a, addrs);
+	}
+	
+	var valRefDoc=EClass.allInstances().select(c| c.isAnnotatedAs("db")).first().eAllContainments;
+
+	
+	var documents : Sequence;
+	
+	for(r in valRefDoc){
+		documents.add(r.eReferenceType);
+	}
+	
+	
+	
+	for(d in documents){
+		d.address(d.name+".", map);
+		
+	}
+
+	return map;	
+
+}
+
+
+operation EClass address(addr: String, map :Map){
+
+	
+	var attributes=self.eAllAttributes.println();
+	
+	for (a in attributes){
+		var  key: String =""+a.name;
+		map.get(a).add(addr+key);
+		
+	}
+	
+	for (r in self.eAllReferences.select(r|r.containment)){
+		if(r.eReferenceType <> self)	
+		r.eReferenceType.address(addr+""+""+r.name+".",map);
+		
+		
+	}
+	
+	for (r in self.eAllReferences.select(r|not r.containment)){
+		
+		if(r.eReferenceType <> self)	
+	
+		var  addrs : Sequence; 
+		addrs.add(addr+r.name);
+		map.put(r,addrs);
+		
+	}
+	
+}
+
+
+operation EClass address2(addr: String){
+//	self.name.println("-->"+addr);
+addr.println("-->");
+	
+	var attributes=self.eAllAttributes.println();
+	
+	for (a in attributes){
+		var  key: String =self.name+"."+a.name;
+		key.println("key: ");
+		map.containsKey(a).println();//.add("x"+"."+self.name+"."+a.name);
+		map.get(a).add(addr+key);
+		
+	}
+	
+	for (r in self.eAllReferences){
+		r.name.print(" ref: ");
+		r.eReferenceType.name.println(" type: ");
+		if(r.eReferenceType <> self)	
+		r.eReferenceType.address(addr+""+self.name+"."+r.name+".");
+		
+		
+	}
+	
+	
+	
+}
+
+
+
+operation Map printNEMap(){
+	
+	for(k in self.keySet()){
+		k.name.println("-----");
+		self.get(k).println();	
+	}
+}
+
+operation Map printAddrMap(){
+	
+	for(k in self.keySet()){
+		k.name.println("-----> ");
+		//self.get(k).println();
+		for(s in self.get(k)){
+			s.println("  ");
+		}	
+	}
+}
+
+operation EClass address(){
+	
+	"----".println();
+	for(e in self){
+		e.name.println();
+	}
+	"----".println();
+}
+
+
+/*
+for( class: EClass in classes){
+ class.name.println();
+ class.eAllReferences.size().println();
+ class. eCrossReferences.println("-");
+class.getEStructuralFeatures().name.println();
+//getFeatureID
+ 
+ for(rf in class.eAllReferences){
+		rf.name.println();
+	}
+}
+
+var attributes =EAttribute.allInstances();
+for( attr: EAttribute in attributes){
+ attr.name.println();
+ 
+ //attr.eClass().println();
+
+}
+*/
+
+
+
+
+
+

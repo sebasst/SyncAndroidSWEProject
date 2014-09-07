@@ -1,0 +1,21 @@
+package com.york.cs.todolite2.document2;
+
+@db
+class TodoDB {
+	val ListTasks[*] listTasks;
+	val Task[*] tasks;
+	
+}
+@document(sharing="shareable", canEditAll="true")
+class ListTasks {
+	attr String title;
+	ref Task[*] tasks;
+}
+@document(sharing="shareable", canEditAll="true")
+class Task{
+	attr String title;
+	attr boolean checked;
+	ref ListTasks[1]#tasks listTask;
+	
+}
+

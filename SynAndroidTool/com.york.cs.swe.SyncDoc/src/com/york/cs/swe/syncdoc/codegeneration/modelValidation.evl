@@ -1,0 +1,300 @@
+import "ecoreutil.eol";
+import "javautil.eol";
+
+
+context ENamedElement {
+  
+  // Every NamedElement must define a name
+  constraint HasName {
+    
+    check : self.name <> ""
+
+    message : "Element \"" + self + "\" must define a name"
+    
+  }
+  
+  
+   constraint NameMustNOTStartWithUnderscoreCase {
+    
+    
+    guard : self.satisfies("HasName")
+    
+    check : self.name.substring(0,1) <> "_"
+    
+    message : "The name of element \"" + self.name + 
+      "\" should not start with an underscore \"_\""
+  
+  }
+  
+  
+  
+}
+
+
+
+context EClass {
+  
+  // Not contaiment ereference can have as target only document classes
+  constraint DocumentReference {
+    
+    guard: not self.isDocument() and not self.isAnnotatedAs("db")
+    
+    check : self.areDocumentContRefOnlyToNonDocuments() 
+
+    message : "Not all containment reference from \""+self.name +"\" class are targeted to non document classes"
+    
+    
+  }
+  
+  // The name of a class should start with
+  // an upper case letter
+  critique NameShouldStartWithUpperCase {
+    
+    guard : self.satisfies("HasName")
+    
+    check : self.name.substring(0,1) = 
+      self.name.substring(0,1).toUpperCase()
+    
+    message : "The name of class \"" + self.name + 
+      "\" should start with an upper-case letter"
+  
+    fix {
+      title : "Rename class " + self.name + " to " + 
+        self.name.firstToUpperCase()
+      
+      do {
+        self.name = self.name.firstToUpperCase();}
+    }
+  }
+  
+  
+}
+
+
+context EReference {
+  
+  // Not contaiment ereference can have as targe only document classes
+  constraint ReferenceOnlyToClassNotcontaiment {
+    
+    guard: not self.isContainment  
+    
+    check : self.eReferenceType.isTypeOf(EClass)
+
+    message : "Non Containment reference  \"" + self.name + "\" has  no as target a class : \""+ self.eReferenceType + "\" which is not a document. Non containment refereces can only target document classes"
+    
+    
+  }
+
+  // Not contaiment ereference can have as targe only document classes
+  constraint ReferenceTarget {
+    
+    guard: self.satisfies("ReferenceOnlyToClassNotcontaiment") and not self.isContainment
+    
+    check : self.eReferenceType.isDocument()
+
+    message : "Containment reference  \"" + self.name + "\" has as taget class : \""+ self.eReferenceType + "\" which is not a document. Non containment refereces can only target document classes"
+    
+    
+  }
+  
+  
+}
+
+context EStructuralFeature {
+// The name of a feature (attribute,referenne,parameter)
+  // should start with a lower case letter
+  critique NameMustStartWithLowerCase {
+    
+    guard : self.satisfies("HasName")
+    
+    check : self.name.substring(0,1) == 
+      self.name.substring(0,1).toLowerCase()
+    
+  }
+}
+context EAttribute {
+  
+  
+  // The name of a attributes should not start with underscore ("_")
+
+  constraint NameMustNOTStartWithUnderscoreCase {
+    
+    
+    guard : self.satisfies("HasName")
+    
+    check : self.name.substring(0,1) <> "_"
+    
+    message : "The name of attribute \"" + self.name + 
+      "\" should not start with an underscore \"_\""
+  
+  }
+  
+ 
+ // The name of attributes should not be "type", it is used as metadata
+ constraint NameMustNOTBeType {
+    
+    
+    guard : self.satisfies("HasName")
+    
+    check : self.name<>"type"
+    
+    message : "The name of attribute \"" + self.name + 
+      "\" should not be  \"type\""
+  
+  }
+ 
+ // The name of attributes should not be "list", it is used as metadata 
+  constraint NameMustNOTBeList {
+    
+    
+    guard : self.satisfies("HasName")
+    
+    check : self.name<>"list"
+    
+    message : "The name of attribute \"" + self.name + 
+      "\" should not be  \"list\""
+  
+  }
+  
+  
+  
+  
+   constraint AttachmentOnlyDocument {
+    
+    
+    guard : self.isAnnotatedAs("attachment") or self.isAnnotatedAs("image")
+    
+    check : self.eContainingClass.isDocument()
+    
+    message : " Attribute \"" + self.name + 
+      "\" is annotated as an attachment. Attachment attributes can be only used in Documents"
+  
+  }
+  
+  constraint AttachmentNotMany {
+    
+    
+    guard : self.isAnnotatedAs("attachment") or self.isAnnotatedAs("image")
+    
+    check : not self.isMany
+    
+    message : " Attribute \"" + self.name + 
+      "\" is annotated as an attachment. Attachment attributes can only be single attributes"
+  
+  }
+  
+    
+}  
+
+
+context EAnnotation {
+  
+  // Attachment annotation only valid for attributes
+  constraint AttachmentOnlyAttribute {
+    
+    guard: self.source="attachment" or self.source="image"
+    
+    check : self.eModelElement.isTypeOf(EAttribute)
+
+    message : "Attachment and image annotations can be only defined  for attributes.\"" + self.source + "\" is not an attribute"
+    
+    
+  }
+  
+  constraint OnlyClassattributes {
+    
+    guard: self.source="db" or self.source="document" 
+    
+    check :  self.eModelElement.isTypeOf(EClass)
+
+    message :"@" +self.source +" annotation can be only defined  in classes.\"" + self.eModelElement.name + "\" cannot define this annotation"
+    
+    
+  }
+  
+  
+}
+
+
+
+
+/*
+context OO!Feature {
+  
+  // The name of a feature (attribute,referecne,parameter)
+  // should start with a lower case letter
+  critique NameMustStartWithLowerCase {
+    
+    guard : self.satisfies("HasName")
+    
+    check : self.name.substring(0,1) = 
+      self.name.substring(0,1).toLowerCase()
+    
+  }
+}
+
+context OO!Class {
+  
+  // The name of a class should start with
+  // an upper case letter
+  critique NameShouldStartWithUpperCase {
+    
+    guard : self.satisfies("HasName")
+    
+    check : self.name.substring(0,1) = 
+      self.name.substring(0,1).toUpperCase()
+    
+    message : "The name of class " + self.name + 
+      " should start with an upper-case letter"
+  
+    fix {
+      title : "Rename class " + self.name + " to " + 
+        self.name.firstToUpperCase()
+      
+      do {
+        self.name = self.name.firstToUpperCase();}
+    }
+  }
+  
+  // A class must not directly or indirectly
+  // inherit from itself
+  constraint MustNotInheritItself {
+    
+    check : not self.inherits(self)
+    
+    message : "Class " + self.name + " inherits itself"
+    
+  }
+  
+  // A class is unused when it is not the type of a feature
+  // or a parameter and is not extended by another class
+  critique UnusedClass {
+    
+    check : Parameter.allInstances.exists(p|p.type = self) or 
+      Feature.allInstances.exists(f|f.type = self) or
+      Class.allInstances.exists(c|c.`extends` = self)
+    
+    message : "Unused class " + self.name
+    
+    fix {
+      title : "Delete class " + self.name
+      
+      do {
+        delete self;
+      }
+    }
+  }
+}
+
+// Returns if a class directly or indirectly
+// inherits from another class
+operation Class inherits(c : Class) : Boolean {
+  
+  if (self.`extends`.isDefined()) {
+    return self.`extends` = c or self.`extends`.inherits(c);
+  }
+  else {
+    return false;
+  }
+}
+*/

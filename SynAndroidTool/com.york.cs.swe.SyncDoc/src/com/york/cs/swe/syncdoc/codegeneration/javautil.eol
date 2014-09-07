@@ -1,0 +1,314 @@
+import "ecoreutil.eol";
+
+operation EClass getAbstractModifier() {
+	if (self.abstract) return " abstract";
+	else return "";
+}
+
+operation EClass getJavaExtends() {
+	if (self.eSuperTypes.size() > 0) {
+		return self.eSuperTypes.get(0).getJavaName();
+	}
+	else {
+		return "DBObject";
+	}
+}
+
+operation EClassifier getJavaBoxedName() {
+	if (self.isAnnotatedAs("stub")) {
+		return self.getAnnotationValue("stub", "javaClass");
+	}
+	else {
+		switch (self.name) {
+			case "EString": return "String";
+			case "ELong": return "Long";
+			case "EInt": return "Integer";
+			case "EBoolean": return "Boolean";
+			case "EFloat": return "Float";
+			case "EIntegerObject": return "Integer";
+			case "EBooleanObject": return "Boolean";
+			case "EDoubleObject": return "Double";
+			default: return self.name;
+		}
+	}
+}
+
+operation EReference getJavaCollectionType() {
+	var stubClass = self.eType.getAnnotationValue("stub", "javaClass");
+	if (stubClass.isDefined() and self.getAnnotationValue("collection", "fromstub") == "true") {
+		return stubClass + "Collection";
+	}
+	else {
+		return self.eType.name + "Collection";
+	}
+}
+
+operation EReference getMongoCollectionName() {
+	if (self.eContainer().getAnnotationValue("db", "qualifiedCollectionNames") == "true") {
+		return self.eContainer().name + "." + self.name;
+	} 
+	else {
+		return self.name;
+	}
+}
+
+operation EClassifier isNumeric() : Boolean {
+	switch (self.name) {
+		case "ELong": return true;
+		case "EInt": return true;
+		case "EIntegerObject": return true;
+		case "EFloat": return true;
+		case "EDouble": return true;
+		default: return false;
+	}
+}
+
+operation EClassifier getJavaName() {
+	if (self.isAnnotatedAs("stub")) {
+		return self.getAnnotationValue("stub", "javaClass");
+	}
+	else {
+		switch (self.name) {
+			case "EString": return "String";
+			case "ELong": return "long";
+			case "EInt": return "int";
+			case "EBoolean": return "boolean";
+			case "EFloat": return "float";
+			case "EIntegerObject": return "int";
+			case "EBooleanObject": return "boolean";
+			case "EDouble": return "double";
+			default: return self.name;
+		}
+	}
+}
+
+operation EClassifier getJavaClassName() {
+	if (self.isAnnotatedAs("stub")) {
+		return self.getAnnotationValue("stub", "javaClass");
+	}
+	else {
+		switch (self.name) {
+			case "EString": return "String";
+			case "ELong": return "Long";
+			case "EInt": return "Integer";
+			case "EBoolean": return "Boolean";
+			case "EFloat": return "Float";
+			case "EIntegerObject": return "Integer";
+			case "EBooleanObject": return "Boolean";
+			case "EDouble": return "Double";
+			default: return self.name;
+		}
+	}
+}
+
+operation EClassifier getParseMethod() {
+	if (self.isTypeOf(EEnum)) {
+		
+	}
+	else {
+		switch (self.name) {
+			case "ELong": return "parseLong";
+			case "EInt": return "parseInteger";
+			case "EBoolean": return "parseBoolean";
+			case "EString": return "parseString";
+			case "EFloat": return "parseFloat";
+			case "EIntegerObject": return "parseInteger";
+			case "EBooleanObject": return "parseBoolean";
+			case "EDouble": return "parseDouble";
+			default: return "";
+		}
+	}
+}
+
+operation EAttribute getDefaultJavaValue() {
+	if (self.eType.name == "EString") {
+		return '"' +  self.defaultValue + '"';
+	}
+	else if (self.eType.name == "EFloat") {
+		return self.defaultValue + "f";
+	}
+	else if (self.eType.name == "EDouble") {
+		return self.defaultValue + "d";
+	}
+	else if (self.defaultValue.isUndefined()) {
+		if (self.eType.getJavaName() == "boolean") return false;
+		else if (self.eType.getJavaName() == "int") return 0;
+	}
+	else if (self.eType.isTypeOf(EEnum)) {
+		return self.eType.name + "." + self.defaultValue;
+	}
+	else {
+		return self.defaultValue;
+	}
+}
+
+
+@cached
+operation String getAddressMap():Map{
+
+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".println();
+	var map :Map;
+	var attrs =EAttribute.allInstances().select(a| not a.eContainingClass.isAnnotatedAs("db"));
+	for(a in attrs){
+	var  addrs : Sequence; 
+		//map.put(a.eContainingClass.name+"."+a.name, addrs);
+		map.put(a, addrs);
+	}
+	
+	var valRefDoc=EClass.allInstances().select(c| c.isAnnotatedAs("db")).first().eAllContainments;
+
+	
+	var documents : Sequence;
+	
+	for(r in valRefDoc){
+		documents.add(r.eReferenceType);
+	}
+	
+	
+	
+	for(d in documents){
+		d.address(d.name+".", map);
+		
+	}
+
+	return map;	
+
+}
+
+
+operation EClass address(addr: String, map :Map){
+
+	
+	var attributes=self.eAllAttributes;//.println();
+	
+	for (a in attributes){
+		var  key: String =""+a.name;
+		map.get(a).add(addr+key);
+		
+	}
+	
+	for (r in self.eAllReferences.select(r|r.containment)){
+		if(r.eReferenceType <> self)	
+		r.eReferenceType.address(addr+""+""+r.name+".",map);
+		
+		
+	}
+	
+	for (r in self.eAllReferences.select(r|not r.containment)){
+		
+		if(r.eReferenceType <> self)	{
+	
+			var  addrs : Sequence; 
+			addrs.add(addr+r.name);
+			map.put(r,addrs);
+		}
+		
+	}
+	
+}
+
+operation EClass isDocument():Boolean{
+
+	var dbClass =EClass.all.select(c | c.isAnnotatedAs("db")).first();
+	if(self.isAnnotatedAs("document"))return true;
+	
+	for( ref in dbClass.eAllContainments.select(r |r.isContainment )){
+		if(self== ref.eReferenceType) return true;
+	}
+	return false;
+	
+}
+
+operation EClass isShareable():Boolean{
+	var value= self.getAnnotationValue("document","sharing");//.equals("shareable");
+	
+	if(value.isDefined()){
+		return value.equals("shareable");
+	}else{
+		return false;
+	}
+	
+}
+
+operation EClass isPrivate():Boolean{
+	var value= self.getAnnotationValue("document","sharing");//.equals("shareable");
+	
+	if(value.isDefined()){
+		return value.equals("private");
+	}else{
+		return true;
+	}
+}
+
+operation EClass isPublic():Boolean{
+	var value= self.getAnnotationValue("document","sharing");//.equals("shareable");
+	
+	if(value.isDefined()){
+		return value.equals("public");
+	}else{
+		return false;
+	}
+}
+
+operation EClass isCanEditAll():Boolean{
+	var value= self.getAnnotationValue("document","canEditAll");//.equals("shareable");
+	
+	if(value.isDefined()){
+		return value.equals("true");
+	}else{
+		return false;
+	}
+}
+
+
+operation EClass areDocumentContRefOnlyToNonDocuments():Boolean{
+	var result= true;
+	
+	var contRef=self.eAllReferences.select(r|r.isContainment);
+	
+	for(r in contRef){
+		
+		var value=not r.eReferenceType.isDocument();
+		
+		result=result and value;
+		
+	}
+	
+	return result;
+}
+
+operation EClass isOnlyOneDB():Boolean{
+	
+	
+	var valRefDoc=EClass.allInstances().select(c| c.isAnnotatedAs("db")).size;
+	
+	
+	return valRefDoc<>1;
+}
+
+
+operation EClass isOnlyOnePackage():Boolean{
+	
+	
+	var valRefDoc=Epackage.allInstances().size;
+	
+	
+	return valRefDoc<>1;
+}
+
+
+operation EClass areDocumentContRefOnlyToNonDocuments():Boolean{
+	var result= true;
+	
+	var contRef=self.eAllReferences.select(r|r.isContainment);
+	
+	for(r in contRef){
+		
+		var value=not r.eReferenceType.isDocument();
+		
+		result=result and value;
+		
+	}
+	
+	return result;
+}

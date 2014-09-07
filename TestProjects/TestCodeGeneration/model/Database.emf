@@ -1,0 +1,61 @@
+package com.york.cs.todolite2.test.blog;
+
+@db
+class Blog {
+	val Post[*] posts;
+	val Member[*] _members; // ==> error name
+	val Author[*] authors;
+}
+
+
+class Post {
+	
+	attr String title;
+	attr String[*] tags1;
+	attr int[*] ratings;
+	val Comment[*] comments;
+	ref Author author1;
+	ref Author[*] authors2;
+	val Stats stats;
+	ref PostType[*] postTypeRef; //==> error reference
+	attr PostType postType;
+}
+
+enum PostType {
+	Regular;
+	Sticky;
+}
+
+class Stats {
+	attr int pageloads;
+	attr int visitors;
+}
+
+class Comment {
+	attr String text;
+	ref Author author;
+	@image //==>error attacahment in no document
+	val Comment[*] replies;
+	ref Member[*] liked;
+	ref Member[*] disliked;
+	attr Flag[*] flags;
+}
+
+enum Flag {
+	Helpful;
+	Offensive;
+	Spam;
+}
+
+class Person {
+
+	attr String name;
+}
+
+class Author extends Person {
+
+}
+
+class Member extends Person {
+	
+}

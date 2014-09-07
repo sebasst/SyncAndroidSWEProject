@@ -1,0 +1,258 @@
+[%import "javautil.eol";%]
+[%import "ecoreutil.eol";%]
+[%var addressmap ="db".getAddressMap();%]
+package [%=c.ePackage.name%];
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.io.InputStream;
+import java.util.List;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import com.york.cs.couchbaseapi.*;
+import com.york.cs.couchbaseapi.queryBuilder.QueryProducer;
+import com.couchbase.lite.CouchbaseLiteException;
+
+[%if (c.isAnnotatedAs("customize")){%]
+[% out.setContentType("Java"); %]
+// protected region custom-imports on begin
+// protected region custom-imports end
+[%}%]
+
+public[%=c.getAbstractModifier()%] class [%=c.name%] extends [%=c.getJavaExtends()%] {
+	
+	[*declared fields*]
+	[*single attributes fields have no variables, only setter an getter functions*]
+	
+	[*attributes an references --mutiple*]
+	[%for (sf in c.eStructuralFeatures.select(sf|sf.isMany )) { %]
+	protected List<[%=sf.eType.getJavaBoxedName()%]> [%=sf.name%] = null;
+	[%}%]
+	[*single reference*]
+	[%for (r in c.eReferences.select(r|not r.isMany ) ) { %]
+	protected [%=r.eType.getJavaClassName()%] [%=r.name%] = null;
+	[%}%]
+	
+	[*attatchment image reference*]
+	[%for (a in c.eAllAttributes.select(a|not a.isMany and a.isAnnotatedAs("image") ) ) { %]
+	private Bitmap [%=a.name%] = null;
+	[%}%]
+	
+	[%for (a in c.eAllAttributes.select(a|not a.isMany and a.isAnnotatedAs("attachment") ) ) { %]
+	private InputStream [%=a.name%] = null;
+	[%}%]
+	
+	
+	[%if (c.isAnnotatedAs("customize")){%]
+	[% out.setContentType("Java"); %]
+	// protected region custom-fields-and-methods on begin
+	// protected region custom-fields-and-methods end
+	[%}%]
+	
+	[*constructor*]
+	
+	public [%=c.name%]() { 
+		super();
+		[%if(c.isDocument()){%]
+			[%if(c.isShareable()){%]
+		sharingStatus="shareable";	
+			[%}else if(c.isPrivate()){%]
+		sharingStatus="private";	
+			[%}else if(c.isPublic()){%]
+		sharingStatus="public";		
+			[%}%]
+		[%}%]
+		[*single not contaiment references*]
+		[%for (r in c.eReferences.select(r|not r.isMany and not r.isContainment)) { %]
+		dbObject.put("[%=r.name%]", new HashMap<String, Object>());
+		[%}%]
+		[*single  contaiment references*]
+		[%for (r in c.eReferences.select(r|r.isContainment and not r.isMany)) { %]
+		dbObject.put("[%=r.name%]", new HashMap<String, Object>());
+		[%}%]
+		[*multiple attributes*]
+		[%for (a in c.eAttributes.select(a|a.isMany )) { %]
+		dbObject.put("[%=a.name%]", new ArrayList<[%=a.eType.getJavaClassName()%]>());
+		[%}%]
+		[*multiple references *]
+		[%for (r in c.eReferences.select(r|r.isMany)) { %]
+		dbObject.put("[%=r.name%]", new ArrayList<HashMap<String, Object>>());
+		[%}%]
+		[*super st supertypes*]
+		[%if (c.eSuperTypes.size() > 0) {%]
+		[%var supers = c.getAllSuperTypes();%]
+		super.setSuperTypes([%var f=false;for (scName in supers.collect(sc | sc.ePackage.name + "." + sc.name)) { if(f) {%],[%}%]"[%=scName%]"[%f=true;}%]);
+		[%}%]
+	}
+	
+	
+	[*Query producer*]
+	[*address for attribute*]
+	[%for (a in c.eAllAttributes.select(a|  not a.isAnnotatedAs("image") and not a.isAnnotatedAs("attachment")) ) { %]
+		[%for(addr in addressmap.get(a)){%]
+		public static QueryProducer [%=addr.replace("\\.", "_")%]= new QueryProducer("[%=c.ePackage.name%].[%=addr%]", "[%=c.ePackage.name%].[%=c.name%]");
+		[%}%]
+	[%}%]
+	[%for (r in c.eAllReferences.select(r|not r.containment)){%]
+		[%for(addr in addressmap.get(r)){%]
+		public static QueryProducer [%=addr.replace("\\.", "_")%]= new QueryProducer("[%=c.ePackage.name%].[%=addr%]","[%=c.ePackage.name%].[%=c.name%]");
+		[%}%]
+	[%}%]
+
+
+	[*getter and setter single attributes*]
+	[%for (a in c.eAttributes.select(a|not a.isMany )) { %]
+	[*getters*]
+	[*enumerations*]
+	[%if (a.eType.isTypeOf(EEnum)){%]
+	public [%=a.eType.getJavaName()%] get[%=a.name.ftuc()%]() {
+		[%=a.eType.getJavaName()%] [%=a.name%] = null;
+		try {
+			[%=a.name%] = [%=a.eType.getJavaName()%].valueOf(dbObject.get("[%=a.name%]")+"");
+		}
+		catch (Exception ex) {}
+		return [%=a.name%];
+	}
+	
+	
+	
+	[*images*]
+	[%}else if (a.isAnnotatedAs("image")){%]
+	
+	public Bitmap get[%=a.name.ftuc()%]() throws CouchbaseLiteException {
+		
+
+		if ([%=a.name%] == null) {
+			[%=a.name%]=BitmapFactory.decodeStream(loadAttachment("[%=a.name%]"));
+			
+		}
+		return [%=a.name%];
+	}
+	
+	public void set[%=a.name.ftuc()%](Bitmap [%=a.name%])  {
+
+		this.[%=a.name%] = [%=a.name%];
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		[%=a.name%].compress(Bitmap.CompressFormat.JPEG, 50, out);
+		ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+		dbObjectAttachments.put("[%=a.name%]", in);
+
+	}
+	[%}else if (a.isAnnotatedAs("attachment")){%]
+	
+	public InputStream get[%=a.name.ftuc()%]() throws CouchbaseLiteException {
+		
+		return loadAttachment("[%=a.name%]");
+	}
+	
+	public void set[%=a.name.ftuc()%](InputStream [%=a.name%])  {
+
+		this.[%=a.name%] = [%=a.name%];
+		
+		dbObjectAttachments.put("[%=a.name%]", InputStream);
+
+	}
+	[*no enumerations*]
+	[%}else{%]
+	public [%=a.eType.getJavaName()%] get[%=a.name.ftuc()%]() {
+		return [%=a.eType.getParseMethod()%](dbObject.get("[%=a.name%]")+"", [%=a.getDefaultJavaValue()%]);
+	}
+	[%}%]
+	
+	[*setters*]
+	public [%=c.name%] set[%=a.name.ftuc()%]([%=a.eType.getJavaName()%] [%=a.name%]) {
+		dbObject.put("[%=a.name%]", [%=a.name%][%if(a.eType.isTypeOf(EEnum)){%].toString()[%}%]);
+		notifyChanged();
+		return this;
+	}
+	[%}%]
+	
+	[*getter  multiple attributes*]
+	[%for (a in c.eAttributes.select(a|a.isMany)) { %]
+	public List<[%=a.eType.getJavaBoxedName()%]> get[%=a.name.ftuc()%]() {
+		if ([%=a.name%] == null) {//TODO -TIPOS DE OBJECTO //FIXME 
+			[%=a.name%] = new PrimitiveList<[%=a.eType.getJavaBoxedName()%]>(this, ((ArrayList<[%=a.eType.getJavaBoxedName()%]>) dbObject.get("[%=a.name%]")));
+		}
+		return [%=a.name%];
+	}
+	[%}%]
+	
+	
+	/*getter  REFERENCES to contained classes*/
+	/* **************************    **********************/ 
+	/*getter multiple REFERENCES*/
+	[%for (r in c.eReferences.select(r|r.isMany and not r.eReferenceType.isDocument())) { %]
+	public List<[%=r.eType.getJavaName()%]> get[%=r.name.ftuc()%]() {
+		if ([%=r.name%] == null) {
+			[%=r.name%] = new DBList<[%=r.eType.getJavaName()%]>(this, "[%=r.name%]", [%=r.isContainment%]);
+		}
+		return [%=r.name%];
+	}
+	[%}%]
+
+	/*Setter and getter simple CONTAIMENT REFERENCES references to inner classes*/
+	[%for (r in c.eReferences.select(r|r.isContainment and not r.isMany and not r.eReferenceType.isDocument())) { %]
+	public [%=r.eType.getJavaName()%] get[%=r.name.ftuc()%]() {
+		if ([%=r.name%] == null && dbObject.containsKey("[%=r.name%]")) {
+			[%=r.name%] = ([%=r.eType.getJavaName()%]) ClassDBFactory.getInstance().createDBObject((HashMap<String, Object>) dbObject.get("[%=r.name%]"));
+			[%=r.name%].setContainer(this);
+		}
+		return [%=r.name%];
+	}
+	
+	public [%=c.name%] set[%=r.name.ftuc()%]([%=r.eType.getJavaName()%] [%=r.name%]) {
+		if (this.[%=r.name%] != [%=r.name%]) {
+			if ([%=r.name%] == null) {
+				dbObject.remove("[%=r.name%]");
+			}
+			else {
+				dbObject.put("[%=r.name%]", [%=r.name%].getDbObject());
+			}
+			this.[%=r.name%] = [%=r.name%];
+			notifyChanged();
+		}
+		return this;
+	}
+	[%}%]
+	
+	//DOCUMENTS!!!!!!!!!!!!!!!!!
+		/*Setter and getter simple NOT CONTAIMENT REFERENCES references to toher documents*/
+	[*[%for (r in c.eReferences.select(r|not r.isContainment and not r.isMany and r.eReferenceType.isDocument())) { %]*]
+	[%for (r in c.eReferences.select(r| not r.isMany and r.eReferenceType.isDocument())) { %]
+	
+	public [%=c.name%] set[%=r.name.ftuc()%]([%=r.eType.getJavaName()%] [%=r.name%]) {
+		if (this.[%=r.name%] != [%=r.name%]) {
+			if ([%=r.name%] == null) {
+				dbObject.put("[%=r.name%]", new HashMap<String, Object>());
+				if(this.[%=r.name%] !=null) this.[%=r.name%] .removeReferencedBy(getId());
+			}
+			else {
+				createReference("[%=r.name%]", [%=r.name%]);
+			}
+			this.[%=r.name%] = [%=r.name%];
+			notifyChanged();
+		}
+		return this;
+	}
+	
+	public [%=r.eType.getJavaName()%] get[%=r.name.ftuc()%]() {
+		if ([%=r.name%] == null) {
+			[%=r.name%] = ([%=r.eType.getJavaName()%]) resolveReference("[%=r.name%]");
+		}
+		return [%=r.name%];
+	}
+	[%}%]
+	
+	
+	/*getter multiple REFERENCES*/
+	[%for (r in c.eReferences.select(r|r.isMany and  r.eReferenceType.isDocument())) { %]
+	public List<[%=r.eType.getJavaName()%]> get[%=r.name.ftuc()%]() {
+		if ([%=r.name%] == null) {
+			[%=r.name%] = new DBList<[%=r.eType.getJavaName()%]>(this, "[%=r.name%]", [%=r.isContainment%]);
+		}
+		return [%=r.name%];
+	}
+	[%}%]
+}
